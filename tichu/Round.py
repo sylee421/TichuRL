@@ -44,8 +44,12 @@ class Round():
         state['action'] = player.hand.get_available_combination()
         state['legal_actions'] = get_legal_combination( state['action'], self.ground )
         state['card_num'] = []
-        for player in players:
-            state['card_num'].append(player.hand.size)
+        # for player in players:
+        #     state['card_num'].append(player.hand.size)
+        for i in range(self.num_players):
+            if i != player_id:
+                player = players[i]
+                state['card_num'].append(player.hand.size)
         return state
         
     def is_over(self):

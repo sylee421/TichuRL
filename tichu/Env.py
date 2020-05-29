@@ -27,7 +27,7 @@ class Env():
 
     def run(self, is_training=False):
         state, player_id = self.init_game()
-
+        state_save, reward_save, action_save = {}, {}, {}
         if self.verbose:
             print("First player: " + str(player_id))
 
@@ -38,7 +38,21 @@ class Env():
                 print("Player" + str(player_id))
                 action.show()
 
-            next_state, next_player_id = self.step(action)
+            ## hynsng training 
+            next_state, next_player_id = self.step(action) # reward addition
+            if is_training & self.agents[player_id].is_training == True: # todo
+                if player_id in state_save:
+                    if state['hand'].size == 0 & state['card_num'][0]>0 & state['card_num'][1]>0 & state['card_num'][2]>0:
+                        reward = 100
+                    elif state['card_num'][0]==0 & state['card_num'][1]==0 & state['card_num'][2]==0:
+                        reward = -100
+                    elif state_save[player_id]['hand'].size - state['hand'].size > 0:
+                        reward = (state_save[player_id]['hand'].size - state['hand'].size)*2
+                    else: reward = -2
+                    
+                    self.agents[player_id].train_d(state_save[player_id], state, reward, self.is_over(), action_save[player_id]) # next state를 다음 자기 trun에서의 next_state로 바꿔야 함
+                state_save[player_id] = state
+                action_save[player_id] = action
 
             state = next_state
             player_id = next_player_id
