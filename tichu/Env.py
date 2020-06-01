@@ -26,11 +26,16 @@ class Env():
         return next_state, player_id
 
     def run(self, is_training=False):
+        trajectories = [[] for _ in range(self.player_num)]
         state, player_id = self.init_game()
 
         if self.verbose:
+            print("Your hand (player0) ")
+            h_state = self.game.get_state(0)
+            h_state['hand'].show()
             print("First player: " + str(player_id))
 
+        trajectories[player_id].append(state)
         while not self.is_over():
             action = self.agents[player_id].step(state)
 
@@ -39,6 +44,7 @@ class Env():
                 action.show()
 
             next_state, next_player_id = self.step(action)
+            trajectories[player_id].append(action)
 
             state = next_state
             player_id = next_player_id

@@ -23,8 +23,16 @@ class Game():
             self.players.append(player)
 
         ### Deal cards
-        for i in range(self.num_players):
+#        for i in range(self.num_players):
+#            self.deck, self.players[i].hand = Deal(self.deck, self.players[i].hand, deck=1, card_num=13)
+        
+###DEBUG
+        strat_flush = [Card('2','Spade'), Card('2','Heart'), Card('3','Spade'),Card('3','Heart'),Card('2','Club')]
+        self.deck, self.players[0].hand = Deal(self.deck, self.players[0].hand, deck=0, card_deal = strat_flush)
+        self.deck, self.players[0].hand = Deal(self.deck, self.players[0].hand, deck=1, card_num=8)
+        for i in range(1,4):
             self.deck, self.players[i].hand = Deal(self.deck, self.players[i].hand, deck=1, card_num=13)
+###
 
         ### Show hands and determine first player
         for i in range(self.num_players):
@@ -44,6 +52,9 @@ class Game():
         state = self.round.get_state(self.players, next_player_id)
 
         return state, next_player_id
+
+    def get_state(self, player_id):
+        return self.round.get_state(self.players, player_id)
 
     def is_over(self):
         return self.round.get_num_out() > 2
