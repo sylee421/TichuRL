@@ -1,4 +1,3 @@
-
 from tichu.Util import Ground
 from tichu.Util import get_legal_combination
 
@@ -24,7 +23,10 @@ class Round():
                 self.out_now.append(self.current_player)
         
         self.current_player = (self.current_player + 1) % self.num_players
-        while self.out_player.count(self.current_player) == 1:
+        while self.out_player.count(self.current_player) == 1 or self.out_now.count(self.current_player) == 1:
+            if self.out_now.count(self.current_player) == 1:
+                self.out_player += self.out_now
+                self.out_now = list()
             self.current_player = (self.current_player + 1) % self.num_players
 
         if self.is_over():
@@ -49,7 +51,7 @@ class Round():
         return state
         
     def is_over(self):
-        return self.num_pass == 3 - len(self.out_player)
+        return self.num_pass >= 3 - len(self.out_player)
 
     def reset_round(self):
         self.num_pass = 0

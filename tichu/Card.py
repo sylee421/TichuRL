@@ -67,7 +67,9 @@ class Cards():
     
     def __init__(self, card_list=None, value=0, ctype='none'):
         if card_list != None:
-            self.cards = card_list
+            self.cards = list()
+            for i in card_list:
+                self.cards.append(i)
             self.cards.sort()
             self.size = len(card_list)
         else:
@@ -98,13 +100,14 @@ class Cards():
                     remain = remain - self.num_show
                     iter_num = iter_num + 1
 
-    def get_combination(self): #TODO
+    def set_combination(self):
         card_set = self.cards
         card_set.sort()
 
         ### pass
         if len(card_set) == 0:
             self.type = 'pass'
+            self.value = 0
             return
 
         ### solo
@@ -126,7 +129,64 @@ class Cards():
             return
 
         ### four
+        if len(card_set) == 4 and card_set[0].value == card_set[1].value and card_set[1].value == card_set[2].value and card_set[2].value == card_set[3].value:
+            self.type = 'four'
+            self.value = card_set[0].value
+            return
 
+        ### full
+        if len(card_set) == 5 and card_set[0].value == card_set[1].value and card_set[1].value == card_set[2].value and card_set[3] == card_set[4]:
+            self.type = 'full'
+            self.value = card_set[0].value
+            return
+        if len(card_set) == 5 and card_set[0].value == card_set[1].value and card_set[2].value == card_set[3].value and card_set[3] == card_set[4]:
+            self.type = 'full'
+            self.value = card_set[2].value
+            return
+
+        ### strat and strat_flush
+        if len(card_set) >= 5:
+            strat = True
+            flush = True
+            for i in range(len(card_set)-1):
+                if card_set[i].value + 1 == card_set[i+1].value:
+                    if card_set[i].suit == card_set[i+1].suit:
+                        pass
+                    else:
+                        flush = False
+                else:
+                    strat = False
+                    break
+            if strat == True and flush == True:
+                self.type = 'strat_flush'
+                self.value = 100 * len(card_set) + card_set[0].value
+                return
+            elif strat == True and flush == False:
+                self.type = 'strat'
+                self.value = 100 * len(card_set) + card_set[0].value
+                return
+            else:
+                pass
+
+        ### pair_seq
+        if len(card_set) >= 4 and len(card_set) % 2 == 0:
+            pair_seq = True
+            for i in range(len(card_set)-1):
+                if i % 2 == 0 and card_set[i].value == card_set[i+1].value:
+                    pass
+                elif i % 2 == 1 and card_set[i].value + 1 == card_set[i+1].value:
+                    pass
+                else:
+                    pair_seq = False
+                    break
+            if pair_seq == True:
+                self.type = 'pair_seq'
+                self.value = 100 * len(card_set) + card_set[0].value
+                return
+
+        ### none
+        self.type = 'none'
+        return
 
     def get_available_combination(self):
         hand_l = self.cards
@@ -196,13 +256,15 @@ class Cards():
                         set_cards[set_num].pop()
                         set_cards[set_num].append(hand_l[j+1])
                         if len(set_cards[0]) > 4:
-                            strat.append( Cards(card_list=copy.deepcopy(set_cards[set_num]), value=int(len(set_cards[set_num-1])*1000 + hand_l[i].value), ctype='strat'))
+#                            strat.append( Cards(card_list=copy.deepcopy(set_cards[set_num]), value=int(len(set_cards[set_num-1])*1000 + hand_l[i].value), ctype='strat'))
+                            strat.append( Cards(card_list=set_cards[set_num], value=int(len(set_cards[set_num-1])*100 + hand_l[i].value), ctype='strat'))
                 elif hand_l[j].value+1 == hand_l[j+1].value:
                     for k in range(len(set_cards)):
                         set_cards[k].append(hand_l[j+1])
                     if len(set_cards[0]) > 4:
                         for k in range(len(set_cards)):
-                            strat.append( Cards(card_list=copy.deepcopy(set_cards[k]), value=int(len(set_cards[k])*1000 + hand_l[i].value), ctype='strat'))
+#                            strat.append( Cards(card_list=copy.deepcopy(set_cards[k]), value=int(len(set_cards[k])*1000 + hand_l[i].value), ctype='strat'))
+                            strat.append( Cards(card_list=set_cards[k], value=int(len(set_cards[k])*100 + hand_l[i].value), ctype='strat'))
                 else:
                     break
                 if j < len(hand_l) - 2:
@@ -245,11 +307,11 @@ class Cards():
                         set_pair[set_num].remove(pair[j].cards[0])
                         set_pair[set_num].remove(pair[j].cards[1])
                         set_pair[set_num] += pair[j+1].cards
-                        pair_seq.append( Cards(card_list=copy.deepcopy(set_pair[set_num]),value=int(len(set_pair[set_num])*1000+pair[i].value),ctype='pair_seq'))
+                        pair_seq.append( Cards(card_list=set_pair[set_num],value=int(len(set_pair[set_num])*100+pair[i].value),ctype='pair_seq'))
                 elif pair[j].value+1 == pair[j+1].value:
                     for k in range(len(set_pair)):
                         set_pair[k] += pair[j+1].cards
-                        pair_seq.append( Cards(card_list=copy.deepcopy(set_pair[k]),value=int(len(set_pair[k])*1000+pair[i].value),ctype='pair_seq'))
+                        pair_seq.append( Cards(card_list=set_pair[k],value=int(len(set_pair[k])*100+pair[i].value),ctype='pair_seq'))
                 else:
                     break
                 if j < len(pair) - 2:

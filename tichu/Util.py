@@ -1,4 +1,5 @@
 import random
+import numpy as np
 
 from tichu.Card import Cards
 
@@ -71,21 +72,21 @@ def get_legal_combination(combinations, ground):
         rt_set = rt_set + combinations[4] + combinations[3] + combinations[6]
     elif ground.type == 'strat':
         for i in combinations[5]:
-            if i.value/1000 != ground.value/1000 or i.value%1000 <= ground.value%1000:
+            if i.value/100 != ground.value/100 or i.value%100 <= ground.value%100:
                 remove_set.append(i)
         for i in remove_set:
             combinations[5].remove(i)
         rt_set = rt_set + combinations[5] + combinations[3] + combinations[6]
     elif ground.type == 'strat_flush':
         for i in combinations[6]:
-            if i.value/1000 != ground.value/1000 or i.value%1000 <= ground.value%1000:
+            if i.value/100 != ground.value/100 or i.value%100 <= ground.value%100:
                 remove_set.append(i)
         for i in remove_set:
             combinations[6].remove(i)
         rt_set = rt_set + combinations[6]
     elif ground.type == 'pair_seq':
         for i in combinations[7]:
-            if i.value/1000 != ground.value/1000 or i.value%1000 <= ground.value%1000:
+            if i.value/100 != ground.value/100 or i.value%100 <= ground.value%100:
                 remove_set.append(i)
         for i in remove_set:
             combinations[7].remove(i)
@@ -95,4 +96,52 @@ def get_legal_combination(combinations, ground):
 
     return rt_set
 
+def reorganize(trajectories, R):
+    player_num = len(trajectories)
+    new_trajectories = [[] for _ in range(player_num)]
 
+    for player in range(player_num):
+        for i in range(0, len(trajectories[player])-2, 2):
+            if i == len(trajectories[player])-3:
+                reward = R[player]
+                terminal = True
+            else:
+                min_card = 13
+                for j in range(player_num):
+                    if j != player:
+                        min_card = min(trajectories[player][0]['card_num'][j], min_card)
+                reward = min_card - trajectories[player][0]['card_num'][player]
+                terminal = False
+            transition = trajectories[player][i:i+3].copy()
+            transition.insert(2, reward)
+            transition.append(terminal)
+
+            new_trajectories[player].append(transition)
+
+    return new_trajectories
+
+def num2action(action_num, hand_list):
+    action = Cards()
+    
+    for i in range(len(hand_list)):
+        if (action_num % (2 ** (i+1))) // (2 ** i) == 1:
+            action.add(hand_list[i])
+
+    action.set_combination()
+    return action
+
+def action2num(action, hand):
+    action_num = 0
+
+    for i in range(action.size):
+        for j in range(hand.size):
+            if action.cards[i] == hand.cards[j]:
+                action_num += 2 ** j
+
+    return action_num
+
+def get_available_action_array(action_set, hand):
+    action_array = np.zeros((8192,), dtype=int)
+    for i in action_set:
+        action_array[action2num(i, hand)] = 1
+    return action_array

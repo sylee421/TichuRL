@@ -23,15 +23,15 @@ class Game():
             self.players.append(player)
 
         ### Deal cards
-#        for i in range(self.num_players):
-#            self.deck, self.players[i].hand = Deal(self.deck, self.players[i].hand, deck=1, card_num=13)
+        for i in range(self.num_players):
+            self.deck, self.players[i].hand = Deal(self.deck, self.players[i].hand, deck=1, card_num=13)
         
 ###DEBUG
-        strat_flush = [Card('2','Spade'), Card('2','Heart'), Card('3','Spade'),Card('3','Heart'),Card('2','Club')]
-        self.deck, self.players[0].hand = Deal(self.deck, self.players[0].hand, deck=0, card_deal = strat_flush)
-        self.deck, self.players[0].hand = Deal(self.deck, self.players[0].hand, deck=1, card_num=8)
-        for i in range(1,4):
-            self.deck, self.players[i].hand = Deal(self.deck, self.players[i].hand, deck=1, card_num=13)
+#        strat_flush = [Card('2','Spade'), Card('3','Spade'), Card('4','Spade'),Card('5','Spade'),Card('6','Spade')]
+#        self.deck, self.players[0].hand = Deal(self.deck, self.players[0].hand, deck=0, card_deal = strat_flush)
+#        self.deck, self.players[0].hand = Deal(self.deck, self.players[0].hand, deck=1, card_num=8)
+#        for i in range(1,4):
+#            self.deck, self.players[i].hand = Deal(self.deck, self.players[i].hand, deck=1, card_num=13)
 ###
 
         ### Show hands and determine first player
@@ -65,9 +65,9 @@ class Game():
     def get_points(self):
         points = [0,0,0,0]
         out_player = self.round.get_out_player()
-        point = 3
+        point = 300
         for i in out_player:
             points[i] = point
-            point -= 1
+            point -= 100
 
         return points
