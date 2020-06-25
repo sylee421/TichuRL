@@ -1,6 +1,8 @@
 
 
 class Priority_min():
+    def __init__(self, is_training=False):
+        self.is_training = is_training 
     
     def step(self, state):
 
