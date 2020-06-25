@@ -3,9 +3,7 @@ import numpy as np
 import tensorflow as tf
 import random
 import os
-from tichu.Util import num2action
-from tichu.Util import action2num
-from tichu.Util import get_available_action_array
+from tichu.Util import num2action, action2num, get_available_action_array, state_parse
 
 Transition = namedtuple('Transition', ['state', 'action', 'reward', 'next_state', 'terminal'])
 
@@ -133,8 +131,8 @@ class DQNAgent(object):
 
     def feed(self, ts):
         (state, action, reward, next_state, terminal) = tuple(ts)
-        state_input = self.state_parse(state)
-        next_state_input = self.state_parse(next_state)
+        state_input = np.reshape(state_parse(state), self.state_shape)
+        next_state_input = np.reshape(state_parse(next_state), self.state_shape)
         action_input = action2num(action, state['hand'])
         self.feed_memory(state_input, action_input, reward, next_state_input, terminal)
         self.total_t += 1
@@ -143,19 +141,16 @@ class DQNAgent(object):
             self.train()
 
     def step(self, state):
-        state_input = self.state_parse(state)
+        state_input = np.reshape(state_parse(state), self.state_shape)
         A = self.predict(state_input)
-#        print(A)
         legal_A = get_available_action_array(state['legal_actions'], state['hand'])
-#        print(legal_A)
         A = self.remove_illegal(A, legal_A)
-#        print(A)
         action = np.random.choice(np.arange(len(A)), p=A)
         action = num2action(action, state['hand'].cards)
         return action
 
     def eval_step(self, state):
-        state_input = self.state_parse(state)
+        state_input = np.reshape(state_parse(state), self.state_shape)
         q_values = self.q_estimator.predict(self.sess, np.expand_dims(state_input, 0))[0]
         legal_A = get_available_action_array(state['legal_actions'], state['hand'])
         probs = self.remove_illegal(np.exp(q_values), legal_A)
@@ -225,57 +220,6 @@ class DQNAgent(object):
             op = v2.assign(v1)
             update_ops.append(op)
         self.sess.run(update_ops)
-
-    def state_parse(self, state):
-        hand = state['hand']
-        hand_state = np.zeros(26)
-        for i in range(hand.size):
-            hand_state[2*i] = hand.cards[i].value
-            if hand.cards[i].suit == 'Spade':
-                hand_state[2*i+1] = 1
-            elif hand.cards[i].suit == 'Heart':
-                hand_state[2*i+1] = 2
-            elif hand.cards[i].suit == 'Dia':
-                hand_state[2*i+1] = 3
-            elif hand.cards[i].suit == 'Club':
-                hand_state[2*i+1] = 4
-            else:
-                raise ValueError
-
-        ground_state = np.zeros(3)
-        ground_type = state['ground'].type
-        if ground_type == 'none':
-            ground_state[0] = 0
-        elif ground_type == 'solo':
-            ground_state[0] = 1
-        elif ground_type == 'pair':
-            ground_state[0] = 2
-        elif ground_type == 'triple':
-            ground_state[0] = 3
-        elif ground_type == 'four':
-            ground_state[0] = 4
-        elif ground_type == 'full':
-            ground_state[0] = 5
-        elif ground_type == 'strat':
-            ground_state[0] = 6
-        elif ground_type == 'strat_flush':
-            ground_state[0] = 7
-        elif ground_type == 'pair_seq':
-            ground_state[0] = 8
-        else:
-            raise ValueError
-        ground_state[1] = state['ground'].value
-        ground_state[2] = state['ground'].player_id
-
-        card_state = np.zeros(3)
-        card_state[0] = state['card_num'][1]
-        card_state[1] = state['card_num'][2]
-        card_state[2] = state['card_num'][3]
-
-        rt_state = np.concatenate((hand_state, ground_state, card_state), axis=None)
-
-        return np.reshape(rt_state, self.state_shape)
-
 
     def save(self):
         checkpoint_dir = './train_data/DQN_SY_tmp'

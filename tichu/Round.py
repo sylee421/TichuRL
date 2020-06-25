@@ -11,6 +11,7 @@ class Round():
         self.out_now = list()
         self.num_pass = 0
         self.ground = Ground()
+        self.used = list()
 
     def proceed_round(self, players, action):
         player = players[self.current_player]
@@ -48,6 +49,7 @@ class Round():
         state['card_num'] = []
         for player in players:
             state['card_num'].append(player.hand.size)
+        state['used'] = self.used
         return state
         
     def is_over(self):
@@ -55,6 +57,7 @@ class Round():
 
     def reset_round(self):
         self.num_pass = 0
+        self.used = self.used + self.ground.cards.cards
         self.ground = Ground()
 
     def get_num_out(self):

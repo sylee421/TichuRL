@@ -26,7 +26,7 @@ evaluate_every = 100
 episode_num = 1000
 memory_init_size = 1000
 train_every = 1
-learning_rate = 0.00001
+learning_rate = 0.0001
 
 ### Config
 #config = tf.compat.v1.ConfigProto(device_count = {'GPU':0}) # gpu off
@@ -35,6 +35,7 @@ learning_rate = 0.00001
 with tf.compat.v1.Session() as sess:
 
     ### Set up agents
+#    agent_0 = agent_1 = agent_2 = agent_3 = DQNAgent(sess,
     agent_0 = DQNAgent(sess,
                        scope='dqn',
                        action_num=env.action_num,
@@ -43,6 +44,8 @@ with tf.compat.v1.Session() as sess:
                        train_every=train_every,
                        state_shape=env.state_shape,
                        mlp_layers=[512,512],
+                       epsilon_start=0.001,
+                       epsilon_end=0.001,
                        learning_rate=learning_rate)
     agent_1 = Random()
     agent_2 = Random()
@@ -61,13 +64,14 @@ with tf.compat.v1.Session() as sess:
         trajectories, point = env.run(is_training=True)
         points = np.add(points,point)
 
-        for player in range(4):
-            for ts in trajectories[player]:
-                agent_0.feed(ts)
+#        for player in range(4):
+#            for ts in trajectories[player]:
+#                agent_0.feed(ts)
 
         if episode% evaluate_every == 0:
             eval_env.run(is_training=False)
             print(points)
             points = np.zeros((4,), dtype=int)
+#            agent_0.save()
 
-    agent_0.save()
+#    agent_0.save()

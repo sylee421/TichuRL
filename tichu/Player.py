@@ -18,6 +18,12 @@ class Player:
             self.hand.show()
 
     def play_cards(self, cards, ground, num_out):
+        if ground.type != 'none' and cards.type != 'strat_flush' and cards.type != 'four':
+            if ground.type != cards.type:
+                print(ground.type)
+                print(cards.type)
+                raise AssertionError
+
         if cards.type != 'pass':
             self.hand = self.hand - cards
             ground.type = cards.type

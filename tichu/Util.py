@@ -145,3 +145,62 @@ def get_available_action_array(action_set, hand):
     for i in action_set:
         action_array[action2num(i, hand)] = 1
     return action_array
+
+def state_parse(state):
+    hand = state['hand']
+    hand_state = np.zeros(26)
+    for i in range(hand.size):
+        hand_state[2*i] = hand.cards[i].value
+        if hand.cards[i].suit == 'Spade':
+            hand_state[2*i+1] = 1
+        elif hand.cards[i].suit == 'Heart':
+            hand_state[2*i+1] = 2
+        elif hand.cards[i].suit == 'Dia':
+            hand_state[2*i+1] = 3
+        elif hand.cards[i].suit == 'Club':
+            hand_state[2*i+1] = 4
+        else:
+            raise ValueError
+
+    ground_state = np.zeros(3)
+    ground_type = state['ground'].type
+    if ground_type == 'none':
+        ground_state[0] = 0
+    elif ground_type == 'solo':
+        ground_state[0] = 1
+    elif ground_type == 'pair':
+        ground_state[0] = 2
+    elif ground_type == 'triple':
+        ground_state[0] = 3
+    elif ground_type == 'four':
+        ground_state[0] = 4
+    elif ground_type == 'full':
+        ground_state[0] = 5
+    elif ground_type == 'strat':
+        ground_state[0] = 6
+    elif ground_type == 'strat_flush':
+        ground_state[0] = 7
+    elif ground_type == 'pair_seq':
+        ground_state[0] = 8
+    else:
+        raise ValueError
+    ground_state[1] = state['ground'].value
+    ground_state[2] = state['ground'].player_id
+
+    card_state = np.zeros(3)
+    card_state[0] = state['card_num'][1]
+    card_state[1] = state['card_num'][2]
+    card_state[2] = state['card_num'][3]
+
+    used = np.zeros(8)
+    state['used'].sort()
+    size = len(state['used'])
+    if size >= 8:
+        for i in range(8):
+            used[i] = state['used'][size - 1 - i].value
+
+    rt_state = np.concatenate((hand_state, ground_state, card_state, used), axis=None)
+
+    return rt_state
+
+

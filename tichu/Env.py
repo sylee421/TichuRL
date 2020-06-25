@@ -14,7 +14,7 @@ class Env():
         self.game = Game()
         self.player_num = self.game.get_player_num()
         self.points = np.zeros(4)
-        self.state_shape = [1, 32]
+        self.state_shape = [1, 40]
         self.action_num = 8192
 
         self.timestep = 0

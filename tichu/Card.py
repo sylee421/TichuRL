@@ -135,11 +135,11 @@ class Cards():
             return
 
         ### full
-        if len(card_set) == 5 and card_set[0].value == card_set[1].value and card_set[1].value == card_set[2].value and card_set[3] == card_set[4]:
+        if len(card_set) == 5 and card_set[0].value == card_set[1].value and card_set[1].value == card_set[2].value and card_set[3].value == card_set[4].value:
             self.type = 'full'
             self.value = card_set[0].value
             return
-        if len(card_set) == 5 and card_set[0].value == card_set[1].value and card_set[2].value == card_set[3].value and card_set[3] == card_set[4]:
+        if len(card_set) == 5 and card_set[0].value == card_set[1].value and card_set[2].value == card_set[3].value and card_set[3].value == card_set[4].value:
             self.type = 'full'
             self.value = card_set[2].value
             return
